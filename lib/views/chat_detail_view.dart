@@ -1,7 +1,9 @@
 import 'package:chat_bubbles/chat_bubbles.dart';
+import 'package:chat_message_timestamp/chat_message_timestamp.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:infinite_scroll_pagination/infinite_scroll_pagination.dart';
+import 'package:intl/intl.dart';
 // import 'package:flutter_pagewise/flutter_pagewise.dart';
 import 'package:sowaan_chat/box.dart';
 import 'package:sowaan_chat/data/database.dart';
@@ -93,15 +95,6 @@ class _ChatDetailViewState extends State<ChatDetailView> {
 
   initializeData() async {
     await loadDB();
-    // setState(() {
-    //   _messagesLoadController = PagewiseLoadController<Messages>(
-    //     pageSize: pageSize,
-    //     pageFuture: (pageIndex) async {
-    //       List<Messages> messages = await getPersonChats(pageIndex);
-    //       return messages;
-    //     },
-    //   );
-    // });
   }
 
   Future loadDB() async {
@@ -200,36 +193,8 @@ class _ChatDetailViewState extends State<ChatDetailView> {
               reverse: true, // For chat apps, reverse the list
               builderDelegate: PagedChildBuilderDelegate<Messages>(
                 itemBuilder: (context, message, index) {
-                  return widget.isGroup
-                      ? Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              message.recipientName.toString(),
-                              style: TextStyle(
-                                fontSize: 12.0,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[600],
-                              ),
-                            ),
-                            BubbleSpecialOne(
-                              text: message.messageContent.toString(),
-                              isSender: message.sender.toString() == "User",
-                              color: message.sender.toString() == "User"
-                                  ? Color(0xFFDCF8C6)
-                                  : Color(0xFFE0E0E0),
-                              tail: false,
-                            )
-                          ],
-                        )
-                      : BubbleSpecialOne(
-                          text: message.messageContent.toString(),
-                          isSender: message.sender.toString() == "User",
-                          color: message.sender.toString() == "User"
-                              ? Color(0xFFDCF8C6)
-                              : Color(0xFFE0E0E0),
-                          tail: false,
-                        );
+                  return messageCard(_pagingController.itemList ?? [], message,
+                      widget.isGroup, index);
                 },
                 noItemsFoundIndicatorBuilder: (context) {
                   return Center(child: Text("No messages found"));
@@ -253,137 +218,73 @@ class _ChatDetailViewState extends State<ChatDetailView> {
   }
 }
 
-
-// child: PagewiseListView<Messages>(
-            //   pageLoadController: _messagesLoadController,
-            //   reverse: true,
-            //   itemBuilder: (context, message, i) {
-            //     return Align(
-            //         alignment: message.sender.toString() == "User"
-            //             ? Alignment.centerRight
-            //             : Alignment.centerLeft,
-            //         child: Container(
-            //           margin: const EdgeInsets.symmetric(
-            //               vertical: 5.0, horizontal: 10.0),
-            //           padding: const EdgeInsets.all(10.0),
-            //           decoration: BoxDecoration(
-            //             color: message.sender.toString() == "User"
-            //                 ? Colors.teal[100]
-            //                 : Colors.grey[300],
-            //             borderRadius: BorderRadius.circular(10.0),
-            //           ),
-            //           child: widget.isGroup
-            //               ? Column(
-            //                   crossAxisAlignment: CrossAxisAlignment.start,
-            //                   children: [
-            //                     Text(
-            //                       message.recipientName.toString(),
-            //                       style: const TextStyle(
-            //                         fontSize: 12.0,
-            //                         fontWeight: FontWeight.bold,
-            //                       ),
-            //                     ),
-            //                     Text(
-            //                       message.messageContent.toString(),
-            //                     ),
-            //                   ],
-            //                 )
-            //               : Text(
-            //                   message.messageContent.toString(),
-            //                 ),
-            //         ));
-            //   },
-            // ),
-
-
-            // child: ListView.builder(
-            //   itemCount: db.messages[widget.id]?.length,
-            //   reverse: true,
-            //   itemBuilder: (context, i) {
-            //     var message = db.messages[widget.id]?[i];
-            //     return BubbleSpecialOne(
-            //       text: message?.messageContent.toString() ?? '',
-            //       isSender: message?.sender.toString() == "User",
-            //       color: message?.sender.toString() == "User"
-            //           ? Color(0xFFB2DFDB)
-            //           : Color(0xFFE0E0E0),
-            //       tail: false,
-                  // textStyle: TextStyle(
-                  //   fontSize: 20,
-                  //   color: Colors.purple,
-                  //   fontStyle: FontStyle.italic,
-                  //   fontWeight: FontWeight.bold,
-                  // ),
-                // );
-                // return Align(
-                //     alignment: message?.sender.toString() == "User"
-                //         ? Alignment.centerRight
-                //         : Alignment.centerLeft,
-                //     child: Container(
-                //       margin: const EdgeInsets.symmetric(
-                //           vertical: 5.0, horizontal: 10.0),
-                //       padding: const EdgeInsets.all(10.0),
-                //       decoration: BoxDecoration(
-                //         color: message?.sender.toString() == "User"
-                //             ? Colors.teal[100]
-                //             : Colors.grey[300],
-                //         borderRadius: BorderRadius.circular(10.0),
-                //       ),
-                //       child: widget.isGroup
-                //           ? Column(
-                //               crossAxisAlignment: CrossAxisAlignment.start,
-                //               children: [
-                //                 Text(
-                //                   message?.recipientName.toString() ?? "",
-                //                   style: const TextStyle(
-                //                     fontSize: 12.0,
-                //                     fontWeight: FontWeight.bold,
-                //                   ),
-                //                 ),
-                //                 Text(
-                //                   message?.messageContent.toString() ?? "",
-                //                 ),
-                //               ],
-                //             )
-                //           : Text(
-                //               message?.messageContent.toString() ?? '',
-                //             ),
-                //     ));
-
-
-
-
-                // Align(
-                //     alignment: message.sender.toString() == "User"
-                //         ? Alignment.centerRight
-                //         : Alignment.centerLeft,
-                //     child: Container(
-                //       margin: const EdgeInsets.symmetric(
-                //           vertical: 5.0, horizontal: 10.0),
-                //       padding: const EdgeInsets.all(10.0),
-                //       decoration: BoxDecoration(
-                //         color: message.sender.toString() == "User"
-                //             ? Colors.teal[100]
-                //             : Colors.grey[300],
-                //         borderRadius: BorderRadius.circular(10.0),
-                //       ),
-                //       child: widget.isGroup
-                //           ? Column(
-                //               crossAxisAlignment: CrossAxisAlignment.start,
-                //               children: [
-                //                 Text(
-                //                   message.recipientName.toString(),
-                //                   style: const TextStyle(
-                //                     fontSize: 12.0,
-                //                     fontWeight: FontWeight.bold,
-                //                   ),
-                //                 ),
-                //                 Text(
-                //                   message.messageContent.toString(),
-                //                 ),
-                //               ],
-                //             )
-                //           : Text(
-                //               message.messageContent.toString(),
-                //             ),
-                //     ));
+Widget messageCard(
+    List<Messages> messages, Messages message, bool isGroup, int index) {
+  return Align(
+    alignment: message.sender.toString() == "User"
+        ? Alignment.centerRight
+        : Alignment.centerLeft,
+    child: Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 8.0),
+      child: Container(
+        margin: EdgeInsets.symmetric(
+            vertical: message.recipientName.toString() != "" ? 5.0 : 2.0,
+            horizontal: 10.0),
+        padding: EdgeInsets.only(
+          top: isGroup ? 4.0 : 10.0,
+          bottom: 10.0,
+          left: 10.0,
+          right: 10.0,
+        ),
+        decoration: BoxDecoration(
+          color: message.sender.toString() == "User"
+              ? Colors.teal[100]
+              : Colors.grey[300],
+          borderRadius: BorderRadius.only(
+            bottomLeft: const Radius.circular(10.0),
+            bottomRight: const Radius.circular(10.0),
+            topLeft: message.sender.toString() == "User"
+                ? const Radius.circular(10.0)
+                : message.recipientName.toString() != ""
+                    ? const Radius.circular(0.0)
+                    : const Radius.circular(10.0),
+            topRight: message.sender.toString() == "User"
+                ? message.recipientName.toString() != ""
+                    ? const Radius.circular(0.0)
+                    : const Radius.circular(10.0)
+                : const Radius.circular(10.0),
+          ),
+        ),
+        constraints: const BoxConstraints(
+          maxWidth: 300,
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (message.recipientName.toString() != "" && isGroup)
+              Text(
+                message.recipientName.toString(),
+                style: const TextStyle(
+                    fontSize: 12.0,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.teal),
+              ),
+            TimestampedChatMessage(
+              text: message.messageContent.toString(),
+              sentAt: DateFormat('HH:mm')
+                  .format(DateTime.parse(message.timestamp.toString())),
+              maxLines: 6,
+              showMoreTextStyle: const TextStyle(color: Colors.teal),
+              style: TextStyle(
+                color: message.sender.toString() == "User"
+                    ? Colors.black
+                    : Colors.black,
+                fontSize: 15,
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
